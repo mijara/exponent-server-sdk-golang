@@ -168,12 +168,6 @@ func (c *PushClient) getReceiptsInternal(payload getReceiptsPayload) (map[string
 	if r.Data == nil {
 		return nil, NewPushServerError("Invalid server response", resp, r, nil)
 	}
-	// Sanity check the response
-	if len(payload.IDs) != len(r.Data) {
-		message := "Mismatched response length. Expected %d receipts but only received %d"
-		errorMessage := fmt.Sprintf(message, len(payload.IDs), len(r.Data))
-		return nil, NewPushServerError(errorMessage, resp, r, nil)
-	}
 	return r.Data, nil
 }
 
