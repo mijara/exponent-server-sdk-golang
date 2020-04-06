@@ -125,6 +125,58 @@ func (c *PushClient) publishInternal(messages []PushMessage) ([]PushResponse, er
 	return r.Data, nil
 }
 
+// PublishMultiple sends multiple push notifications at once
+// @param push_messages: An array of PushMessage objects.
+// @return an array of PushResponse objects which contains the results.
+// @return error if the request failed
+func (c *PushClient) GetReceipts(ids []string) (map[string]PushReceipt, error) {
+	return c.getReceiptsInternal(getReceiptsPayload{IDs: ids})
+}
+
+type getReceiptsPayload struct {
+	IDs []string `json:"ids"`
+}
+
+func (c *PushClient) getReceiptsInternal(payload getReceiptsPayload) (map[string]PushReceipt, error) {
+	url := fmt.Sprintf("%s%s/push/getReceipts", c.host, c.apiURL)
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.httpClient.Post(url, "application/json", bytes.NewBuffer(jsonBytes))
+	if err != nil {
+		return nil, err
+	}
+	// Check that we didn't receive an invalid response
+	err = checkStatus(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate the response format first
+	var r *PushReceiptResponse
+	err = json.NewDecoder(resp.Body).Decode(&r)
+	if err != nil {
+		// The response isn't json
+		return nil, err
+	}
+	// If there are errors with the entire request, raise an error now.
+	if r.Errors != nil {
+		return nil, NewPushServerError("Invalid server response", resp, r, r.Errors)
+	}
+	// We expect the response to have a 'data' field with the responses.
+	if r.Data == nil {
+		return nil, NewPushServerError("Invalid server response", resp, r, nil)
+	}
+	// Sanity check the response
+	if len(payload.IDs) != len(r.Data) {
+		message := "Mismatched response length. Expected %d receipts but only received %d"
+		errorMessage := fmt.Sprintf(message, len(payload.IDs), len(r.Data))
+		return nil, NewPushServerError(errorMessage, resp, r, nil)
+	}
+	return r.Data, nil
+}
+
 func checkStatus(resp *http.Response) error {
 	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
 		return nil

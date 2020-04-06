@@ -172,13 +172,13 @@ type MessageRateExceededError struct {
 type PushServerError struct {
 	Message      string
 	Response     *http.Response
-	ResponseData *Response
+	ResponseData interface{}
 	Errors       []map[string]string
 }
 
 // NewPushServerError creates a new PushServerError object
 func NewPushServerError(message string, response *http.Response,
-	responseData *Response,
+	responseData interface{},
 	errors []map[string]string) *PushServerError {
 	return &PushServerError{
 		Message:      message,
