@@ -12,7 +12,7 @@ type ExponentPushToken string
 // ErrMalformedToken is returned if a token does not start with 'ExponentPushToken'
 var ErrMalformedToken = errors.New("Token should start with ExponentPushToken")
 
-//NewExponentPushToken returns a token and may return an error if the input token is invalid
+// NewExponentPushToken returns a token and may return an error if the input token is invalid
 func NewExponentPushToken(token string) (ExponentPushToken, error) {
 	if !strings.HasPrefix(token, "ExponentPushToken") {
 		return "", ErrMalformedToken
@@ -91,6 +91,7 @@ const ErrorMessageRateExceeded = "MessageRateExceeded"
 type PushResponse struct {
 	PushMessage PushMessage
 	Status      string            `json:"status"`
+	ID          string            `json:"id"`
 	Message     string            `json:"message"`
 	Details     map[string]string `json:"details"`
 }
