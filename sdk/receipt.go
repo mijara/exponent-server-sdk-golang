@@ -1,9 +1,9 @@
 package expo
 
 type PushReceipt struct {
-	Status  string            `json:"status"`
-	Message string            `json:"message"`
-	Details map[string]string `json:"details"`
+	Status  string                 `json:"status"`
+	Message string                 `json:"message"`
+	Details map[string]interface{} `json:"details"`
 }
 
 type PushReceiptResponse struct {
